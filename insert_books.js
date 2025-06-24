@@ -1,198 +1,139 @@
-// insert_books.js - Script to populate MongoDB with sample book data
 
-// Import MongoDB client
-const { MongoClient } = require('mongodb');
+const connectToDatabase = require('./db'); // Adjust the path as necessary
+const { ObjectId } = require('mongodb');
 
-// Connection URI (replace with your MongoDB connection string if using Atlas)
-const uri = 'mongodb://localhost:27017';
-
-// Database and collection names
-const dbName = 'plp_bookstore';
-const collectionName = 'books';
-
-// Sample book data
-const books = [
-  {
-    title: 'To Kill a Mockingbird',
-    author: 'Harper Lee',
-    genre: 'Fiction',
-    published_year: 1960,
-    price: 12.99,
-    in_stock: true,
-    pages: 336,
-    publisher: 'J. B. Lippincott & Co.'
-  },
-  {
-    title: '1984',
-    author: 'George Orwell',
-    genre: 'Dystopian',
-    published_year: 1949,
-    price: 10.99,
-    in_stock: true,
-    pages: 328,
-    publisher: 'Secker & Warburg'
-  },
-  {
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    genre: 'Fiction',
-    published_year: 1925,
-    price: 9.99,
-    in_stock: true,
-    pages: 180,
-    publisher: 'Charles Scribner\'s Sons'
-  },
-  {
-    title: 'Brave New World',
-    author: 'Aldous Huxley',
-    genre: 'Dystopian',
-    published_year: 1932,
-    price: 11.50,
-    in_stock: false,
-    pages: 311,
-    publisher: 'Chatto & Windus'
-  },
-  {
-    title: 'The Hobbit',
-    author: 'J.R.R. Tolkien',
-    genre: 'Fantasy',
-    published_year: 1937,
-    price: 14.99,
-    in_stock: true,
-    pages: 310,
-    publisher: 'George Allen & Unwin'
-  },
-  {
-    title: 'The Catcher in the Rye',
-    author: 'J.D. Salinger',
-    genre: 'Fiction',
-    published_year: 1951,
-    price: 8.99,
-    in_stock: true,
-    pages: 224,
-    publisher: 'Little, Brown and Company'
-  },
-  {
-    title: 'Pride and Prejudice',
-    author: 'Jane Austen',
-    genre: 'Romance',
-    published_year: 1813,
-    price: 7.99,
-    in_stock: true,
-    pages: 432,
-    publisher: 'T. Egerton, Whitehall'
-  },
-  {
-    title: 'The Lord of the Rings',
-    author: 'J.R.R. Tolkien',
-    genre: 'Fantasy',
-    published_year: 1954,
-    price: 19.99,
-    in_stock: true,
-    pages: 1178,
-    publisher: 'Allen & Unwin'
-  },
-  {
-    title: 'Animal Farm',
-    author: 'George Orwell',
-    genre: 'Political Satire',
-    published_year: 1945,
-    price: 8.50,
-    in_stock: false,
-    pages: 112,
-    publisher: 'Secker & Warburg'
-  },
-  {
-    title: 'The Alchemist',
-    author: 'Paulo Coelho',
-    genre: 'Fiction',
-    published_year: 1988,
-    price: 10.99,
-    in_stock: true,
-    pages: 197,
-    publisher: 'HarperOne'
-  },
-  {
-    title: 'Moby Dick',
-    author: 'Herman Melville',
-    genre: 'Adventure',
-    published_year: 1851,
-    price: 12.50,
-    in_stock: false,
-    pages: 635,
-    publisher: 'Harper & Brothers'
-  },
-  {
-    title: 'Wuthering Heights',
-    author: 'Emily Brontë',
-    genre: 'Gothic Fiction',
-    published_year: 1847,
-    price: 9.99,
-    in_stock: true,
-    pages: 342,
-    publisher: 'Thomas Cautley Newby'
-  }
-];
-
-// Function to insert books into MongoDB
-async function insertBooks() {
-  const client = new MongoClient(uri);
-
-  try {
-    // Connect to the MongoDB server
-    await client.connect();
-    console.log('Connected to MongoDB server');
-
-    // Get database and collection
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
-
-    // Check if collection already has documents
-    const count = await collection.countDocuments();
-    if (count > 0) {
-      console.log(`Collection already contains ${count} documents. Dropping collection...`);
-      await collection.drop();
-      console.log('Collection dropped successfully');
-    }
-
-    // Insert the books
-    const result = await collection.insertMany(books);
-    console.log(`${result.insertedCount} books were successfully inserted into the database`);
-
-    // Display the inserted books
-    console.log('\nInserted books:');
-    const insertedBooks = await collection.find({}).toArray();
-    insertedBooks.forEach((book, index) => {
-      console.log(`${index + 1}. "${book.title}" by ${book.author} (${book.published_year})`);
-    });
-
-  } catch (err) {
-    console.error('Error occurred:', err);
-  } finally {
-    // Close the connection
-    await client.close();
-    console.log('Connection closed');
-  }
+async function name(params) {
+    
 }
+// MongoDB Book Collection Utilities
 
-// Run the function
-insertBooks().catch(console.error);
+// Find all books in a specific genre
+const findByGenre = async (db, genre) => {
+  return await db.collection('books').find({ genre }).toArray();
+};
 
-/*
- * Example MongoDB queries you can try after running this script:
- *
- * 1. Find all books:
- *    db.books.find()
- *
- * 2. Find books by a specific author:
- *    db.books.find({ author: "George Orwell" })
- *
- * 3. Find books published after 1950:
- *    db.books.find({ published_year: { $gt: 1950 } })
- *
- * 4. Find books in a specific genre:
- *    db.books.find({ genre: "Fiction" })
- *
- * 5. Find in-stock books:
- *    db.books.find({ in_stock: true })
- */ 
+// Find books published after a certain year
+const findByPublicationYear = async (db, year) => {
+  return await db.collection('books').find({ published_year: { $gt: year } }).toArray();
+};
+
+// Find books by a specific author
+const findByAuthor = async (db, author) => {
+  return await db.collection('books').find({ author }).toArray();
+};
+
+// Update the price of a specific book
+const updatePrice = async (db, title, newPrice) => {
+  return await db.collection('books').updateOne(
+    { title },
+    { $set: { price: newPrice } }
+  );
+};
+
+// Delete a book by its title
+const deleteBook = async (db, title) => {
+  return await db.collection('books').deleteOne({ title });
+};
+
+// Find books in stock and published after a certain year
+const findInStockAfterYear = async (db, year) => {
+  return await db.collection('books').find(
+    { in_stock: true, published_year: { $gt: year } },
+    { projection: { title: 1, author: 1, price: 1, _id: 0 } }
+  ).toArray();
+};
+
+// Sort books by price ascending
+const sortByPriceAscending = async (db) => {
+  return await db.collection('books').find(
+    {},
+    { projection: { title: 1, author: 1, price: 1, _id: 0 } }
+  ).sort({ price: 1 }).toArray();
+};
+
+// Sort books by price descending
+const sortByPriceDescending = async (db) => {
+  return await db.collection('books').find(
+    {},
+    { projection: { title: 1, author: 1, price: 1, _id: 0 } }
+  ).sort({ price: -1 }).toArray();
+};
+
+// Paginate books - 5 per page
+const paginateBooks = async (db, page) => {
+  const limit = 5;
+  const skip = (page - 1) * limit;
+  return await db.collection('books').find(
+    {},
+    { projection: { title: 1, author: 1, price: 1, _id: 0 } }
+  ).skip(skip).limit(limit).toArray();
+};
+
+// Get average price of books by genre
+const avgPriceByGenre = async (db) => {
+  return await db.collection('books').aggregate([
+    { $group: { _id: "$genre", avgPrice: { $avg: "$price" } } }
+  ]).toArray();
+};
+
+// Find the author with the most books
+const authorWithMostBooks = async (db) => {
+  return await db.collection('books').aggregate([
+    { $group: { _id: "$author", count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 1 }
+  ]).toArray();
+};
+
+// Group books by decade
+const booksByDecade = async (db) => {
+  return await db.collection('books').aggregate([
+    {
+      $project: {
+        decade: {
+          $subtract: [
+            "$published_year",
+            { $mod: ["$published_year", 10] }
+          ]
+        }
+      }
+    },
+    {
+      $group: {
+        _id: "$decade",
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $sort: { _id: 1 }
+    }
+  ]).toArray();
+};
+
+// Create index on title
+const createTitleIndex = async (db) => {
+  return await db.collection('books').createIndex({ title: 1 });
+};
+
+// Create compound index on author and published_year
+const createAuthorYearIndex = async (db) => {
+  return await db.collection('books').createIndex({ author: 1, published_year: 1 });
+};
+
+// Export all functions
+module.exports = {
+  findByGenre,
+  findByPublicationYear,
+  findByAuthor,
+  updatePrice,
+  deleteBook,
+  findInStockAfterYear,
+  sortByPriceAscending,
+  sortByPriceDescending,
+  paginateBooks,
+  avgPriceByGenre,
+  authorWithMostBooks,
+  booksByDecade,
+  createTitleIndex,
+  createAuthorYearIndex
+};
